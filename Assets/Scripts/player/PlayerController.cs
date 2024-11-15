@@ -9,6 +9,8 @@ public class PlayerController : MonoBehaviour
     public float autoRotationSpeed = 10.0f;
     [Header("Animação")]
     public Animator ani;
+    [Header("Combate")]
+    public CombatController combatControl;
 
     void Start(){
 
@@ -21,7 +23,7 @@ public class PlayerController : MonoBehaviour
         float vertical = Input.GetAxis("Vertical");
 
         // Verifica se há movimento
-        if (horizontal != 0 || vertical != 0)
+        if ((horizontal != 0 || vertical != 0) && !combatControl.isAttackEnemy)
         {
             // Calcula a direção do movimento com base na câmera
             Vector3 cameraForward = Camera.main.transform.forward;
