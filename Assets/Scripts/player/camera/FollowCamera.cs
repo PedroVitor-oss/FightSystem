@@ -15,6 +15,8 @@ public class FollowCamera : MonoBehaviour
 
     private void Start()
     {
+        Cursor.lockState = CursorLockMode.Locked;
+
         // Posiciona a câmera inicialmente na posição correta
         if (player != null)
         {

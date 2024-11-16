@@ -22,8 +22,11 @@ public class PlayerController : MonoBehaviour
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
 
+
+        //verifica se pode se mover
+        if(!combatControl.isAttackEnemy){
         // Verifica se há movimento
-        if ((horizontal != 0 || vertical != 0) && !combatControl.isAttackEnemy)
+        if ((horizontal != 0 || vertical != 0))
         {
             // Calcula a direção do movimento com base na câmera
             Vector3 cameraForward = Camera.main.transform.forward;
@@ -45,7 +48,13 @@ public class PlayerController : MonoBehaviour
             transform.position += moveDirection * moveSpeed * Time.deltaTime;
 
             //Animação de andando
-            ani.SetFloat("MoveVertical",vertical);
+            ani.SetFloat("MoveVertical",Mathf.Clamp(vertical+horizontal,-1,1) );
+            ani.SetBool("punch",false);
         }
+        }
+    }
+    public void StartAniPunch()
+    {
+        ani.SetBool("punch",true);
     }
 }
