@@ -7,42 +7,88 @@ public class CombatController : MonoBehaviour
     public DetectEnime detectEnime;
     public PlayerController pcontroler;
     public bool isAttackEnemy = false;
+    private EnemyScript enemy;
+    public Rigidbody rig;
+    [Header("Combo")]
+    public int comboStep = 0;
+    public float comboCooldown = 1.0f;
+    private float lastAttackTime = 0;
+
+
+    private void Start()
+    {
+        rig = GetComponent<Rigidbody>();
+    }
 
     // Update is called once per frame
     void Update()
     {
+        if (isAttackEnemy)
+        {
+            Vector3 moveDirection = (enemy.transform.position - transform.position).normalized;
+            // moveDirection.y = 0;
+
+            // Faz o player olhar na direção do inimigo
+            Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10.0f * Time.deltaTime);
+
+        }
+
         if (Input.GetKeyDown(KeyCode.E))
         {
             // has um currentEnime
             if (detectEnime.GetCurrentEnime() != null)
             {
-                EnemyScript enemy = detectEnime.GetCurrentEnime();
-                // va para cima do inimigo
+                enemy = detectEnime.GetCurrentEnime();
+                // atacar inimigo
                 if (!isAttackEnemy)
                 {
-                    //olhar para o inimifo
+                    isAttackEnemy = true;
 
                     float dist = Vector3.Distance(transform.position, enemy.transform.position);
-                    if (dist > 1)
+                    if (dist > 1) // inimigo muito longe ir para sima dele 
                     {
 
-                        Vector3 moveDirection = (enemy.transform.position - transform.position).normalized;
-                        // moveDirection.y = 0;
-
-                        // Faz o player olhar na direção do movimento
-                        Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
-                        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10.0f * Time.deltaTime);
 
 
                         //mover para inimigo
-                        StartCoroutine(MoveToEnemy(enemy, (dist * 1.5f) / 10.0f));
-                        isAttackEnemy = true;
+                        StartCoroutine(MoveToEnemy(enemy, 0.9f));
 
                         //iniciar a animação de jump punch
-                        pcontroler.StartAniPunch();
+                        pcontroler.StartAniPunch(0);
+                    }
+                    else if (dist <= 1)
+                    {
+                        // Está em alcance para iniciar o combo
+                        isAttackEnemy = true;
+                        ExecuteCombo();
                     }
                 }
             }
+        }
+    }
+    void ExecuteCombo()
+    {
+        if (isAttackEnemy)
+        {
+            // Verifica se está dentro do tempo para continuar o combo
+            if (Time.time - lastAttackTime <= comboCooldown)
+            {
+                comboStep++;
+                if (comboStep > 3) // Limite de combos
+                {
+                    comboStep = 1; // Reinicia o combo
+                }
+                pcontroler.StartAniPunch(comboStep);
+            }
+            else
+            {
+                comboStep = 1; // Reseta o combo se passar do cooldown
+                pcontroler.StartAniPunch(comboStep);
+            }
+
+            lastAttackTime = Time.time; // Atualiza o tempo do último ataque
+            Invoke("DesativeAttack", 1);
         }
     }
     IEnumerator MoveToEnemy(EnemyScript enemy, float time)
@@ -63,7 +109,39 @@ public class CombatController : MonoBehaviour
 
         // Garante que o player chegue exatamente na posição do inimigo no final
         transform.position = targetPosition;
-        isAttackEnemy = false;
-    }
+        DesativeAttack();
+        // rig.constraints = RigidbodyConstraints.None;
 
+    }
+    void DesativeAttack()
+    {
+        isAttackEnemy = false;
+        pcontroler.FinishAniPunch();
+    }
+    private void OnCollisionEnter(Collision other)
+    {
+        Debug.Log("Colide");
+        EnemyScript enimeColider = other.gameObject.GetComponent<EnemyScript>();
+        if (enimeColider != null)
+        {
+            if (enimeColider == detectEnime.GetCurrentEnime())
+            {
+                Debug.Log("Colider how enime");
+                // rig.constraints = RigidbodyConstraints.FreezePositionY;
+                if (isAttackEnemy) enimeColider.Hit();
+            }
+        }
+    }
+    private void OnCollisionExit(Collision other)
+    {
+        Debug.Log("exit Colide");
+        EnemyScript enimeColider = other.gameObject.GetComponent<EnemyScript>();
+        if (enimeColider != null)
+        {
+            if (enimeColider == detectEnime.GetCurrentEnime())
+            {
+                rig.velocity = Vector3.zero;
+            }
+        }
+    }
 }
