@@ -34,7 +34,7 @@ public class CombatController : MonoBehaviour
 
         }
 
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.E) && false)
         {
             // has um currentEnime
             if (detectEnime.GetCurrentEnime() != null)
@@ -120,6 +120,8 @@ public class CombatController : MonoBehaviour
     }
     private void OnCollisionEnter(Collision other)
     {
+        if(!isAttackEnemy)
+        return;
         Debug.Log("Colide");
         EnemyScript enimeColider = other.gameObject.GetComponent<EnemyScript>();
         if (enimeColider != null)
@@ -134,6 +136,8 @@ public class CombatController : MonoBehaviour
     }
     private void OnCollisionExit(Collision other)
     {
+        if(!isAttackEnemy)
+        return;
         Debug.Log("exit Colide");
         EnemyScript enimeColider = other.gameObject.GetComponent<EnemyScript>();
         if (enimeColider != null)

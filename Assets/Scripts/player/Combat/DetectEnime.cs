@@ -29,7 +29,9 @@ public class DetectEnime : MonoBehaviour
         inputDirection = forward;
 
         RaycastHit hit;
-
+        if(GetComponent<CombatController>().isAttackEnemy){
+            return;
+        }
         if (Physics.SphereCast(transform.position, 3f, inputDirection, out hit, distMaxEnime,layerMask))
         {
             if(hit.collider.transform.GetComponent<EnemyScript>()){
