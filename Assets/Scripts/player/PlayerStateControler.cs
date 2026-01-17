@@ -1,5 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class PlayerStateControler : MonoBehaviour
 {
@@ -10,9 +13,14 @@ public class PlayerStateControler : MonoBehaviour
 
     void Update()
     {
-        if(inGround && CheckChangeState(state, new List<PlayerState> { PlayerState.Fall }))//futuramente adicionar climbi, webSwing, etc 
+        if (inGround && CheckChangeState(state, new List<PlayerState> { PlayerState.Fall }))//futuramente adicionar climbi, webSwing, etc 
         {
+            Debug.Log("esta sendo chamando aqui?");
             ChangeState(PlayerState.Idle);
+        }
+        else if (!inGround && CheckChangeState(state, new List<PlayerState> { PlayerState.Idle, PlayerState.Move, PlayerState.Fight }))
+        {
+            ChangeState(PlayerState.Fall);
         }
     }
 
@@ -26,6 +34,11 @@ public class PlayerStateControler : MonoBehaviour
         if (newState == state)
             return true;
 
+        // if (state == PlayerState.Fall && newState == PlayerState.Move)
+        // {
+        //     EditorApplication.isPaused = true;
+        //     Debug.Log("fall to move state, isground: " + inGround);
+        // }
         switch (state)
         {
             case PlayerState.Idle:
@@ -37,6 +50,10 @@ public class PlayerStateControler : MonoBehaviour
                 }))
                 {
                     state = newState;
+                    if (newState == PlayerState.Jump)
+                    {
+                        inGround = false;
+                    }
                     return true;
                 }
                 break;
@@ -49,6 +66,10 @@ public class PlayerStateControler : MonoBehaviour
                 }))
                 {
                     state = newState;
+                    if (newState == PlayerState.Jump)
+                    {
+                        inGround = false;
+                    }
                     return true;
                 }
                 break;
@@ -63,14 +84,34 @@ public class PlayerStateControler : MonoBehaviour
                 }
                 break;
             case PlayerState.Fall:
-                if (CheckChangeState(newState, new List<PlayerState>
+                if (inGround)
                 {
-                    PlayerState.Idle,
-                    PlayerState.Move,
-                }) && inGround)
+                    Debug.Log("trocar de fall para idle ou move: " + newState);
+                    // EditorApplication.isPaused = true;
+                    if (CheckChangeState(newState, new List<PlayerState>
+                    {
+                        PlayerState.Idle,
+                        PlayerState.Move,
+
+                    }))
+                    {
+                        state = newState;
+                        return true;
+                    }
+                }
+                else
                 {
-                    state = newState;
-                    return true;
+                    Debug.Log("trocar de fall para climb ou runwall: " + newState);
+                    // EditorApplication.isPaused = true;
+                    if (CheckChangeState(newState, new List<PlayerState>
+                    {
+                        PlayerState.Climb,
+                        PlayerState.RunWall,
+                    }))
+                    {
+                        state = newState;
+                        return true;
+                    }
                 }
                 break;
             case PlayerState.Fight:
@@ -82,7 +123,28 @@ public class PlayerStateControler : MonoBehaviour
                 {
                     state = newState;
                     return true;
-                }   
+                }
+                break;
+            case PlayerState.Climb:
+                if (CheckChangeState(newState, new List<PlayerState>
+                {
+                    PlayerState.Fall
+                }))
+                {
+                    state = newState;
+                    return true;
+                }
+                break;
+            case PlayerState.RunWall:
+            Debug.Log("[PLayerStateControler] run wall to "+newState);
+                if (CheckChangeState(newState, new List<PlayerState>
+                {
+                    PlayerState.Fall
+                }))
+                {
+                    state = newState;
+                    return true;
+                }
                 break;
         }
 
@@ -98,7 +160,7 @@ public class PlayerStateControler : MonoBehaviour
     {
         inGround = false;
     }
-    
+
     private bool CheckChangeState(PlayerState state, List<PlayerState> list)
     {
         return list.Contains(state);

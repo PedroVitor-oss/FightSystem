@@ -18,8 +18,10 @@ public class PlayerController : MonoBehaviour
 
     [Header("State PLayer")]
     public PlayerStateControler playerStateControler = new PlayerStateControler();
+    public ClimbManager climbManager; // Referência ao gerenciador de escalada
+
     public bool injump;
-    public float jumpTime=0.5f;
+    public float jumpTime = 0.5f;
     // public bool inGround;
     [Header("Animação")]
     public Animator ani;
@@ -40,7 +42,7 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))// && !combatControl.isAttackEnemy && Mathf.Abs(rig.velocity.y) < 0.01f)
         {
-            if (playerStateControler.ChangeState(PlayerState.Jump) && playerStateControler.CheckInGround())
+            if (playerStateControler.ChangeState(PlayerState.Jump)/* && playerStateControler.CheckInGround()*/)
                 StartAniJump();
         }
 
@@ -55,45 +57,53 @@ public class PlayerController : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, autoRotationSpeed * Time.deltaTime);
 
         }
-        
-        if ((horizontal != 0 || vertical != 0))
+
+        if (playerStateControler.CheckInGround())
         {
-            //verifica se pode se mover
-                ani.SetFloat("MoveVertical", Mathf.Clamp(Mathf.Abs(vertical) + Mathf.Abs(horizontal), -1, 1));
-            if (playerStateControler.ChangeState(PlayerState.Move))
+            if ((horizontal != 0 || vertical != 0))
             {
+                //verifica se pode se mover
+                ani.SetFloat("MoveVertical", Mathf.Clamp(Mathf.Abs(vertical) + Mathf.Abs(horizontal), -1, 1));
 
-                // Verifica se há movimento
+                if (playerStateControler.ChangeState(PlayerState.Move))
+                {
 
-                // Calcula a direção do movimento com base na câmera
-                Vector3 cameraForward = Camera.main.transform.forward;
-                cameraForward.y = 0; // Ignora a rotação vertical da câmera
-                cameraForward.Normalize();
+                    // Verifica se há movimento
 
-                Vector3 cameraRight = Camera.main.transform.right;
-                cameraRight.y = 0;
-                cameraRight.Normalize();
+                    // Calcula a direção do movimento com base na câmera
+                    Vector3 cameraForward = Camera.main.transform.forward;
+                    cameraForward.y = 0; // Ignora a rotação vertical da câmera
+                    cameraForward.Normalize();
 
-                moveDirection = (cameraForward * vertical + cameraRight * horizontal).normalized;
+                    Vector3 cameraRight = Camera.main.transform.right;
+                    cameraRight.y = 0;
+                    cameraRight.Normalize();
 
-                // Faz o player olhar na direção do movimento
-                Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, autoRotationSpeed * Time.deltaTime);
+                    moveDirection = (cameraForward * vertical + cameraRight * horizontal).normalized;
 
-
-                // Move o player
-                // transform.position += moveDirection * moveSpeed * Time.deltaTime;
+                    // Faz o player olhar na direção do movimento
+                    Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, autoRotationSpeed * Time.deltaTime);
 
 
-                //Animação de andando
-                ani.SetBool("punch", false);
+                    // Move o player
+                    // transform.position += moveDirection * moveSpeed * Time.deltaTime;
+
+
+                    //Animação de andando
+                    ani.SetBool("punch", false);
+                }
             }
-        }
-        else
-        {
-            playerStateControler.ChangeState(PlayerState.Idle);
-            ani.SetFloat("MoveVertical", 0);
+            else
+            {
+                if (!playerStateControler.CheckState(PlayerState.Fall))
+                {
 
+                    playerStateControler.ChangeState(PlayerState.Idle);
+                    ani.SetFloat("MoveVertical", 0);
+                }
+
+            }
         }
 
     }
@@ -105,11 +115,11 @@ public class PlayerController : MonoBehaviour
             rig.velocity = moveDirection * moveSpeed * Time.deltaTime;
             rig.velocity = new Vector3(rig.velocity.x, vy, rig.velocity.z);
         }
-        if(playerStateControler.CheckState(PlayerState.Idle))
+        if (playerStateControler.CheckState(PlayerState.Idle))
         {
             rig.velocity = new Vector3(0, rig.velocity.y, 0);
         }
-        if(playerStateControler.CheckState(PlayerState.Jump) && rig.velocity.y < 0)
+        if (playerStateControler.CheckState(PlayerState.Jump) && rig.velocity.y < 0)
         {
             playerStateControler.ChangeState(PlayerState.Fall);
         }
@@ -125,7 +135,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            Invoke("Jump",jumpTime);
+            Invoke("Jump", jumpTime);
         }
     }
     public void Jump()
@@ -149,23 +159,51 @@ public class PlayerController : MonoBehaviour
         ani.SetBool("punch", false);
     }
 
+    public void disableFisic()
+    {
+        rig.isKinematic = true;
+    }
+    public void activateFisic()
+    {
+        rig.isKinematic = false;
+    }
+    public void AniamationCLimb()
+    {
+        if (playerStateControler.CheckState(PlayerState.Climb))
+            ani.SetBool("Climb", true);
+        if (playerStateControler.CheckState(PlayerState.RunWall))
+            ani.SetBool("RunWall", true);
+    }
+    public void EndAniamationCLimb()
+    {
+         if (playerStateControler.CheckState(PlayerState.Climb))
+            ani.SetBool("Climb", false);
+        if (playerStateControler.CheckState(PlayerState.RunWall))
+            ani.SetBool("RunWall", false);
+    }
     void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
         {
-            
+
             //verificar se o chao esta embaixo do player
             RaycastHit hit = new RaycastHit();
             // Debug.Log(hit);
             //intanciar um primitiva aqui
-                Debug.Log(" colidiu com o chao");
-            if (Physics.Raycast(transform.position + Vector3.up * 0.5f , Vector3.down, out hit, 1f,groundLayer))
+            // Debug.Log(" colidiu com o chao");
+            if (Physics.Raycast(transform.position + Vector3.up * 0.5f, Vector3.down, out hit, 1f, groundLayer))
             {
                 playerStateControler.ColisionGround();
                 injump = false;
                 ani.SetBool("inGround", playerStateControler.CheckInGround());
-                Debug.Log("pode andar colidiu com o chao da forma certa");
+                // Debug.Log("pode andar colidiu com o chao da forma certa");
             }
+            else
+            {
+                Debug.Log("CheckWallColisino for climb or runwall");
+                climbManager.CheckWallCollision();
+            }
+
         }
     }
 }

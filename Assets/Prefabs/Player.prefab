@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7329226214855033398}
   - component: {fileID: 3071481804379421286}
   - component: {fileID: 7329226214855033393}
+  - component: {fileID: 177354206753554500}
   - component: {fileID: 1871684605}
   - component: {fileID: 5040975813545296131}
   - component: {fileID: 1871684610}
@@ -65,14 +66,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdad942fa27d7a749beb5afff30a31ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  prefabball: {fileID: 0}
   moveSpeed: 250
   jumpForce: 5
   autoRotationSpeed: 10
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
   playerStateControler: {fileID: 3071481804379421286}
+  climbManager: {fileID: 177354206753554500}
   injump: 0
+  jumpTime: 0.5
   ani: {fileID: 7329226214631347801}
   combatControl: {fileID: 5040975813545296131}
   detectEnime: {fileID: 1871684605}
+--- !u!114 &177354206753554500
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7329226214855033399}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbc0cb04be0792d4c9ab735aa26a268e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerStateControler: {fileID: 0}
+  playerMoviment: {fileID: 0}
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  wallRunAngleThreshold: 0.3
 --- !u!114 &1871684605
 MonoBehaviour:
   m_ObjectHideFlags: 0

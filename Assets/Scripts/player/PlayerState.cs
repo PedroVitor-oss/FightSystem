@@ -4,5 +4,7 @@ public enum PlayerState
     Move,
     Jump,
     Fall,
-    Fight
+    Fight,
+    Climb,
+    RunWall
 }
