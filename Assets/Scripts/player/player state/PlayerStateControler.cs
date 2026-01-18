@@ -15,7 +15,7 @@ public class PlayerStateControler : MonoBehaviour
     {
         if (inGround && CheckChangeState(state, new List<PlayerState> { PlayerState.Fall }))//futuramente adicionar climbi, webSwing, etc 
         {
-            Debug.Log("esta sendo chamando aqui?");
+            // Debug.Log("esta sendo chamando aqui?");
             ChangeState(PlayerState.Idle);
         }
         else if (!inGround && CheckChangeState(state, new List<PlayerState> { PlayerState.Idle, PlayerState.Move, PlayerState.Fight }))
@@ -37,7 +37,7 @@ public class PlayerStateControler : MonoBehaviour
         // if (state == PlayerState.Fall && newState == PlayerState.Move)
         // {
         //     EditorApplication.isPaused = true;
-        //     Debug.Log("fall to move state, isground: " + inGround);
+            // Debug.Log("fall to move state, isground: " + inGround);
         // }
         switch (state)
         {
@@ -86,7 +86,7 @@ public class PlayerStateControler : MonoBehaviour
             case PlayerState.Fall:
                 if (inGround)
                 {
-                    Debug.Log("trocar de fall para idle ou move: " + newState);
+                    // Debug.Log("trocar de fall para idle ou move: " + newState);
                     // EditorApplication.isPaused = true;
                     if (CheckChangeState(newState, new List<PlayerState>
                     {
@@ -101,12 +101,15 @@ public class PlayerStateControler : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("trocar de fall para climb ou runwall: " + newState);
+                    // Debug.Log("trocar de fall para climb ou runwall: " + newState);
                     // EditorApplication.isPaused = true;
                     if (CheckChangeState(newState, new List<PlayerState>
                     {
                         PlayerState.Climb,
                         PlayerState.RunWall,
+                        PlayerState.Gramppiling,
+                        PlayerState.IdleGramppiling,
+                        //PlayerState.Webswing,
                     }))
                     {
                         state = newState;
@@ -136,7 +139,7 @@ public class PlayerStateControler : MonoBehaviour
                 }
                 break;
             case PlayerState.RunWall:
-            Debug.Log("[PLayerStateControler] run wall to "+newState);
+            // Debug.Log("[PLayerStateControler] run wall to "+newState);
                 if (CheckChangeState(newState, new List<PlayerState>
                 {
                     PlayerState.Fall
@@ -146,6 +149,16 @@ public class PlayerStateControler : MonoBehaviour
                     return true;
                 }
                 break;
+            case PlayerState.Gramppiling:
+            if (CheckChangeState(newState, new List<PlayerState>
+                {
+                    PlayerState.Fall
+                }))
+                {
+                    state = newState;
+                    return true;
+                }
+            break;
         }
 
         return false;

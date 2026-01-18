@@ -80,14 +80,14 @@ public class ClimbManager : MonoBehaviour
 
         if (!hitWallLeft && !hitWallRight)
         {
-            rig.velocity = forceForward * speed;
+            rig.velocity = transform.forward * speed;
             StopRunWall();
         }
 
         if (Input.GetKeyDown(KeyCode.P))
         {
             EditorApplication.isPaused = true;
-            Debug.Log("forceForward " + forceForward);
+            // Debug.Log("forceForward " + forceForward);
         }
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -132,7 +132,7 @@ public class ClimbManager : MonoBehaviour
 
         if (hitWallFoward && !hitWallLeft && !hitWallRight)//CLIMB
         {
-            Debug.Log("[ClimbManage] colision for climb");
+            // Debug.Log("[ClimbManage] colision for climb");
             mainHit = hitForward;
 
             float wallVerticality = Mathf.Abs(mainHit.normal.y);
@@ -145,11 +145,11 @@ public class ClimbManager : MonoBehaviour
         }
         else if (hitWallLeft || hitWallRight)
         {
-            Debug.Log("[ClimbManage] colision for runwall");
+            // Debug.Log("[ClimbManage] colision for runwall");
             mainHit = hitWallRight ? hitRight : hitLeft;
             RaycastHit hit = hitWallRight ? hitRight : hitLeft;
             string wallSide = hitWallRight ? "right" : "left";
-            Debug.Log("Hit na parede do lado: " + wallSide);
+            // Debug.Log("Hit na parede do lado: " + wallSide);
             float wallVerticality = Mathf.Abs(mainHit.normal.y);
             if (wallVerticality > 0.2f)
                 return; // não é parede
@@ -180,13 +180,13 @@ public class ClimbManager : MonoBehaviour
 
     void DefinePositionWall(string side)
     {
-        Debug.Log("Definindo posição na parede do lado: " + side);
+        // Debug.Log("Definindo posição na parede do lado: " + side);
         positionWall = side;
     }
 
     public void StartRunWall()
     {
-        Debug.Log("[ClimbManage] StartRunWall");
+        // Debug.Log("[ClimbManage] StartRunWall");
         playerStateControler.ChangeState(PlayerState.RunWall);
         playerMoviment.AniamationCLimb();
 
@@ -198,7 +198,7 @@ public class ClimbManager : MonoBehaviour
 
     public void StartClimb()
     {
-        Debug.Log("[ClimbManage] StartClimb");
+        // Debug.Log("[ClimbManage] StartClimb");
         playerStateControler.ChangeState(PlayerState.Climb);
         playerMoviment.AniamationCLimb();
         // PointFollowCam.ToPoint(2);
@@ -220,7 +220,7 @@ public class ClimbManager : MonoBehaviour
     public void StopRunWall()
     {
         // state = fall;
-        Debug.Log("[ClimbControler] StopRunWall");
+        // Debug.Log("[ClimbControler] StopRunWall");
         playerMoviment.EndAniamationCLimb();
         playerStateControler.ChangeState(PlayerState.Fall);
 

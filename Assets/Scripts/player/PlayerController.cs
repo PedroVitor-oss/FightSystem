@@ -181,6 +181,10 @@ public class PlayerController : MonoBehaviour
         if (playerStateControler.CheckState(PlayerState.RunWall))
             ani.SetBool("RunWall", false);
     }
+    public void AniGramppliling()
+    {
+        ani.SetTrigger("Gramppiling");
+    }
     void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Ground"))

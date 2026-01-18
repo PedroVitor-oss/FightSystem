@@ -6,5 +6,7 @@ public enum PlayerState
     Fall,
     Fight,
     Climb,
-    RunWall
+    RunWall,
+    Gramppiling,
+    IdleGramppiling
 }
